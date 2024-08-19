@@ -4,16 +4,16 @@
   "description": "Restful api backend toko bumbu ",
   "main": "index.ts",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon src/index.ts",
     "start": "npx tsc -w",
     "build": "tsc",
     "format": "prettier --write .",
-     "prepare": "husky",
+    "prepare": "husky",
     "check-types": "tsc --pretty --noEmit",
     "check-format": "prettier --check .",
     "check-lint": "eslint . --ext ts --ext tsx --ext js"
   },
-   "husky": {
+  "husky": {
     "hooks": {
       "pre-commit": "npx pretty-quick --staged ng lint ng test",
       "pre-push": "ng build --aot true"
@@ -37,6 +37,7 @@
     "typescript-eslint": "^7.4.0"
   },
   "dependencies": {
+    "@prisma/client": "^5.18.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -46,6 +47,7 @@
     "joi": "^17.12.2",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.0",
+    "prisma": "^5.18.0",
     "uuid": "^9.0.1"
   }
 }
