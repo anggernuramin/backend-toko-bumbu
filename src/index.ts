@@ -1,10 +1,23 @@
-import express from 'express'
-const app = express()
+import express, { Application, Request, Response, NextFunction } from 'express'
+import cors from 'cors'
+import routes from './routes'
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+const app: Application = express()
+const port: number = 3000
+
+// middleware
+app.use(express.json())
+app.use(cors())
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', '*')
+  res.setHeader('Access-Control-Allow-Headers', '*')
+  next()
 })
 
-// app.listen(3000, () => {
-//   console.log('Server started on port 3000')
-// })
+// kumpulan endpoint api
+routes(app)
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
