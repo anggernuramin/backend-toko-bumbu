@@ -1,12 +1,19 @@
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
 import { productValidation } from '../validations/product.validation'
-
-const prisma = new PrismaClient()
+import { prisma } from '../config/prisma'
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await prisma.products.findMany()
+    const products = await prisma.products.findMany({
+      include: {
+        // categories: true // join table dan mengambil isi value dari table categories
+        categories: {
+          select: {
+            title: true // Hanya mengambil title dari category
+          }
+        }
+      }
+    })
     return res.status(200).send({
       success: true,
       statusCode: 200,
@@ -25,22 +32,17 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const validation = productValidation(req.body)
-    if (!validation.success) {
+    const { error, value } = productValidation(req.body)
+    if (error) {
       return res.status(422).send({
         success: false,
         statusCode: 422,
-        message: validation.error.errors[0].message,
+        message: error.details[0].message,
         data: null
       })
     }
     const product = await prisma.products.create({
-      data: {
-        title: validation.data.title,
-        description: validation.data.description,
-        price: validation.data.price,
-        quantity: validation.data.quantity
-      }
+      data: value
     })
     return res.status(201).send({
       success: true,
@@ -61,7 +63,7 @@ export const createProduct = async (req: Request, res: Response) => {
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const product = await prisma.products.delete({
+    await prisma.products.delete({
       where: {
         id: Number(id)
       }
@@ -70,7 +72,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       success: true,
       statusCode: 200,
       message: 'Success delete product',
-      data: product
+      data: null
     })
   } catch (error) {
     return res.status(500).send({
@@ -85,12 +87,12 @@ export const deleteProduct = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const { title, description, price, quantity, category } = req.body
-    if (!title || !price || !quantity || !category || !description) {
+    const { error, value } = productValidation(req.body)
+    if (error) {
       return res.status(400).send({
         success: false,
         statusCode: 400,
-        message: 'Missing required field',
+        message: error.details[0].message,
         data: null
       })
     }
@@ -98,12 +100,7 @@ export const updateProduct = async (req: Request, res: Response) => {
       where: {
         id: Number(id)
       },
-      data: {
-        title,
-        description,
-        price,
-        quantity
-      }
+      data: value
     })
     return res.status(200).send({
       success: true,

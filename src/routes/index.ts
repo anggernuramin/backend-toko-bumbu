@@ -1,8 +1,12 @@
 import { Application, Router } from 'express'
 import { ProductRouter } from './product.router'
+import { CategoryRouter } from './category.router'
 
 // main router
-const _routes: Array<[String, Router]> = [['/api/products', ProductRouter]]
+const _routes: Array<[String, Router]> = [
+  ['/api/products', ProductRouter],
+  ['/api/categories', CategoryRouter]
+]
 
 const routes = (app: Application) => {
   _routes.forEach((route: [any, Router]) => {

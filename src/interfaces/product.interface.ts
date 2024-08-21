@@ -3,4 +3,5 @@ export interface ProductInterface {
   description: string | null
   price: number
   quantity: number
+  categoryId: number
 }
