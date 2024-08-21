@@ -13,9 +13,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model product {
-  id String @id @default(cuid())
-  name String 
-  price Int
-  description String
+enum Category {
+  makanan
+  minuman
+}
+
+// tabel product
+model products {
+  id Int @id @default(autoincrement()) // sama dengan serial kalo di postgres  @id artinya id akan dianggap sebagai primery key
+  title String @db.VarChar(255)  // not null
+  description String? @db.Text // boleh null
+  price Float  @db.DoublePrecision
+  quantity Int @default(0) @db.Integer
+  createdAt DateTime @default(now()) // menyimpan data saat di buat
+  updateAt DateTime @updatedAt // menyimpan data saat ada perubahan
 }
