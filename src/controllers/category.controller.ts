@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { prisma } from '../config/prisma'
 import { categoryValidation } from '../validations/category.vaidation'
+import { checkCategoryById } from '../services/category.service'
 
 export const getCategory = async (req: Request, res: Response) => {
   try {
@@ -16,6 +17,36 @@ export const getCategory = async (req: Request, res: Response) => {
       success: false,
       statusCode: 500,
       message: "Can't get all categories",
+      data: null
+    })
+  }
+}
+
+export const getCategoryById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id)
+    const category = await checkCategoryById(id)
+
+    if (category === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'category not found',
+        data: null
+      })
+    }
+
+    return res.status(200).send({
+      success: true,
+      statusCode: 200,
+      message: 'Success get by id',
+      data: category
+    })
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      statusCode: 500,
+      message: "Can't get all category",
       data: null
     })
   }
@@ -67,6 +98,16 @@ export const createCategory = async (req: Request, res: Response) => {
 export const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
+    const category = await checkCategoryById(Number(id))
+    if (category === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'category not found',
+        data: null
+      })
+    }
+
     const { error, value } = categoryValidation(req.body)
     if (error) {
       return res.status(422).send({
@@ -103,6 +144,15 @@ export const updateCategory = async (req: Request, res: Response) => {
 export const deleteCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
+    const category = await checkCategoryById(Number(id))
+    if (category === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'category not found',
+        data: null
+      })
+    }
 
     await prisma.categories.delete({
       where: {
