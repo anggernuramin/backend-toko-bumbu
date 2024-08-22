@@ -5,7 +5,12 @@ import { checkCustomerById } from '../services/customer.service'
 
 export const getCustomer = async (req: Request, res: Response) => {
   try {
-    const customers = await prisma.customers.findMany()
+    const customers = await prisma.customers.findMany({
+      include: {
+        // nama wallet diambil dari nama key saat membuat schema prisma yaitu sebelum menyebutkan nama table
+        wallet: true
+      }
+    })
     return res.status(200).send({
       success: true,
       statusCode: 200,
@@ -55,6 +60,7 @@ export const getCustomerById = async (req: Request, res: Response) => {
 export const createCustomer = async (req: Request, res: Response) => {
   try {
     const { error, value } = customerValidation(req.body)
+    console.log('🚀 ~ createCustomer ~ value:', value)
     if (error) {
       return res.status(422).send({
         success: false,
@@ -89,7 +95,7 @@ export const createCustomer = async (req: Request, res: Response) => {
     return res.status(500).send({
       success: false,
       statusCode: 500,
-      message: "Can't create customer",
+      message: dbError.message,
       data: null
     })
   }
