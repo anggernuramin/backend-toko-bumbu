@@ -7,7 +7,7 @@ const app: Application = express()
 const port: number = 3000
 
 const wss = new WebSocket.Server({ port: 8002 })
-// cara menjalankan via terminal untuk ngetrigger web socket server
+// cara menjalankan via terminal untuk ngetrigger web socket server menggunakan bantuan package wscat
 // wscat -c ws://localhost:8002
 
 wss.on('connection', (ws: WebSocket) => {

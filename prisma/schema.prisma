@@ -13,12 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// tabel categories
 model categories {
   id Int @id @default(autoincrement())
   title String @db.VarChar(255) @unique // memastikan titile tidak boleh sama dalam 1 table
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
-
 
   // Relasi ke products
   products  products[]  // Satu category bisa punya banyak products
@@ -39,4 +39,10 @@ model products {
   categories categories @relation(fields: [categoryId], references: [id]) // berelasi dengan  tabel category references id
 }
 
-// tabel category
+// tabel customers
+model customers {
+  id Int @id @default(autoincrement())
+  email String @db.VarChar(100) @unique
+  first_name String @db.VarChar(100)
+  last_name String? @db.VarChar(100)
+}
