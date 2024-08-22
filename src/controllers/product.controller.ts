@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { productValidation } from '../validations/product.validation'
 import { prisma } from '../config/prisma'
+import { checkProdukById } from '../services/product.service'
+import { checkCategoryById } from '../services/category.service'
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
@@ -29,7 +31,36 @@ export const getProducts = async (req: Request, res: Response) => {
     })
   }
 }
+export const getProductById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id)
 
+    // cek produk by id
+    const product = await checkProdukById(id)
+    if (product === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'product not found',
+        data: null
+      })
+    }
+
+    return res.status(200).send({
+      success: true,
+      statusCode: 200,
+      message: 'Success get product by id',
+      data: product
+    })
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      statusCode: 500,
+      message: "Can't get all product",
+      data: null
+    })
+  }
+}
 export const createProduct = async (req: Request, res: Response) => {
   try {
     const { error, value } = productValidation(req.body)
@@ -41,6 +72,18 @@ export const createProduct = async (req: Request, res: Response) => {
         data: null
       })
     }
+
+    // cek category by id karena tabel ini berelasi dengan table categories
+    const category = await checkCategoryById(Number(value.categoryId))
+    if (category === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'category not found',
+        data: null
+      })
+    }
+
     const product = await prisma.products.create({
       data: value
     })
@@ -63,6 +106,16 @@ export const createProduct = async (req: Request, res: Response) => {
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
+    const productId = await checkProdukById(Number(id))
+
+    if (productId === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'product not found',
+        data: null
+      })
+    }
     await prisma.products.delete({
       where: {
         id: Number(id)
@@ -87,6 +140,16 @@ export const deleteProduct = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
+    const productId = await checkProdukById(Number(id))
+    if (productId === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'product not found',
+        data: null
+      })
+    }
+
     const { error, value } = productValidation(req.body)
     if (error) {
       return res.status(400).send({
@@ -96,12 +159,25 @@ export const updateProduct = async (req: Request, res: Response) => {
         data: null
       })
     }
+
+    // ceck category by id karena tabel ini berelasi dengan table categories
+    const category = await checkCategoryById(value.categoryId)
+    if (category === null) {
+      return res.status(404).send({
+        success: false,
+        statusCode: 404,
+        message: 'category not found',
+        data: null
+      })
+    }
+
     const product = await prisma.products.update({
       where: {
         id: Number(id)
       },
       data: value
     })
+
     return res.status(200).send({
       success: true,
       statusCode: 200,

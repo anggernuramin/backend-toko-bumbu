@@ -1,7 +1,7 @@
 import Joi from 'joi'
-import { InterfaceCustomer } from '../interfaces/customer.interface'
+import { CustomerInterface } from '../interfaces/customer.interface'
 
-export const customerValidation = (payload: InterfaceCustomer) => {
+export const customerValidation = (payload: CustomerInterface) => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     first_name: Joi.string().required(),
