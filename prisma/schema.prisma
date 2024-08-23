@@ -6,6 +6,11 @@
 
 generator client {
   provider = "prisma-client-js"
+  // aktifkan fungsi fulltext search (mencari data di database dengan lebih cepat) indexs agar bisa digunakan
+   previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  // lalu buat perintah di sql client/psql terminal untuk mnejalankan perintah membuat fulltext search seperti dibawah ini
+  // create index products_title_search on products using gin (to_tsvector('indonesian', title));
+  // arti dari query diatas adalah membuat fulltextsearch dengan nama producst_title_search di tabel products dengan mencari berdasarkan nama
 }
 
 datasource db {
@@ -35,8 +40,12 @@ model products {
   updateAt DateTime @updatedAt // menyimpan data saat ada perubahan
 
   // relasi dengan tabel category
-  categoryId Int
+  categoryId Int @db.Integer
   categories categories @relation(fields: [categoryId], references: [id]) // berelasi dengan  tabel category references id
+
+  // definiskan table order_details agar tabel order_details mempunyai akses ke table product 
+  orderDetail orders_detail[]
+
 }
 
 // tabel customers berelasi dengan tabel wallets/dompet , one to one (karena 1 customer hanya boleh mempunyai 1 wallet )
@@ -47,8 +56,7 @@ model customers {
   lastName String? @db.VarChar(100)
 
   // kolom header wallet yang menyimpan relasi antara table wallet dengan menampikna id customer
-  wallet  wallets[]  // Satu wallet  hanya bisa dimiliki oleh 1 customer
-  
+  wallet  wallets[]  // Satu wallet  hanya bisa dimiliki oleh 1 customer 
 }
 
 // tabel wallet
@@ -60,3 +68,29 @@ model wallets {
   customerId Int @unique // maka dengan id yang dijadikan forign key seperti ini maka dipastikan relasi nya one to one karena customerId tidak boleh ada yang sama dengan nilai disetiap data 
   customer customers @relation(fields: [customerId], references: [id])
 }
+
+// tabel order
+model orders {
+  id Int @id @default(autoincrement())
+  total Int @db.Integer
+  orderDate DateTime @default(now())
+
+  // definiskan table order_details agar tabel order_details mempunyai akses ke table orders 
+  orderDetail orders_detail[]
+}
+
+// tabel orders-detail => Tabel ini akan menjadi jembatan untuk tabel order dan tabel product. karena tabel product dan tabel orders many to many artinya. sehingga satu product bisa dijual beberapa kali dalam tabel order dan satu order bisa membeli lebih dari satu product. pada tabel ini akan menampung primary key dari tabel orders dan product.
+model orders_detail {
+  productId Int @db.Integer
+  orderId Int @db.Integer
+  price Int @db.Integer
+  quantity Int @db.Integer
+
+  //  relasi many to many dengan mempunyai 2 relasi ke tabel yang berbeda yaitu tabel orders dan products
+  orders orders @relation(fields: [orderId], references: [id])
+  products products @relation(fields: [productId], references: [id])
+
+  // primary key nya ada 2
+  @@id([productId, orderId])
+}
+
